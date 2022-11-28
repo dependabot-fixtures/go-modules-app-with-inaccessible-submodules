@@ -5,29 +5,29 @@ on:
       - main
   workflow_dispatch:
 
-  env:
-    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    jobs:
-      test:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v3
+  jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v3
 
-        - name: Download CLI
-          run: |
-            gh release download --repo dependabot/cli -p "*linux-amd64.tar.gz"
-            tar xzvf *.tar.gz >/dev/null 2>&1
-            ./dependabot --version
+      - name: Download CLI
+        run: |
+          gh release download --repo dependabot/cli -p "*linux-amd64.tar.gz"
+          tar xzvf *.tar.gz >/dev/null 2>&1
+          ./dependabot --version
 
-        - name: Do the test
-          env:
-            LOCAL_GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            set -o pipefail
-            ./dependabot test -f=test.yaml -o=result.yaml --timeout 20m 2>&1 | tee -a log.txt
+      - name: Do the test
+        env:
+          LOCAL_GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -o pipefail
+          ./dependabot test -f=test.yaml -o=result.yaml --timeout 20m 2>&1 | tee -a log.txt
 
-        - name: Diff
-          if: always()
-          continue-on-error: true
-          run: diff --ignore-space-change test.yaml result.yaml && echo "Contents are identical" || exit 0
+      - name: Diff
+        if: always()
+        continue-on-error: true
+        run: diff --ignore-space-change test.yaml result.yaml && echo "Contents are identical" || exit 0
